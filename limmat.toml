@@ -1,0 +1,152 @@
+num_worktrees = 8
+
+resources = [
+    { name = "kbs", count = 8 },
+    { name = "devrez_machine", count = 1 },
+]
+
+[[tests]]
+name = "bzImage_defconfig"
+command = """
+set -eu
+make -sj8 defconfig
+scripts/config -e CONFIG_LOCALVERSION_AUTO -e CONFIG_IKCONFIG -e CONFIG_IKCONFIG_PROC \
+    -e CONFIG_DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT -e DEBUG_ENTRY
+make -j olddefconfig
+CCACHE_SLOPPINESS=time_macros make -sj8 bzImage CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
+make kernelrelease > $LIMMAT_ARTIFACTS/kernelrelease.txt
+cp arch/x86/boot/bzImage $LIMMAT_ARTIFACTS
+"""
+
+# TODO: This hardcodes the location of the kconfig file.
+# It's also a very heavy config, that's so I can boot it on my hardware in the office.
+[[tests]]
+name = "bzImage_asi"
+command = """
+set -eu
+cp ~/src/limmat-kernel/config-6.12-asi-aethelred .config
+make -j olddefconfig
+grep ADDRESS_SPACE_ISOLATION .config
+CCACHE_SLOPPINESS=time_macros make -sj8 bzImage CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
+make kernelrelease > $LIMMAT_ARTIFACTS/kernelrelease.txt
+cp arch/x86/boot/bzImage $LIMMAT_ARTIFACTS
+"""
+
+
+# TODO: This doesn't work.
+# I fixed https://github.com/danobi/vmtest/issues/96 but there's still a QGA
+# setup issue, perhaps something to do with my host system.
+[[tests]]
+name = "mm-selftests-asi"
+depends_on = ["bzImage_asi"]
+command = """
+set -eux
+exec 2>&1
+
+make -sj8 CC='ccache gcc' headers
+make -sj8 CC='ccache gcc' -C tools/testing/selftests install TARGETS=mm
+
+kernel="$LIMMAT_ARTIFACTS_bzImage_asi"/bzImage
+
+# Embed the config here so we get the benefit of local-ci's cache invalidation logic
+# Per https://github.com/danobi/vmtest/blob/master/docs/config.md,
+# Anyway, vmtest interprets paths relative to the location of its config file,
+# instead of the actual CWD. So we need the config to be in the CWD.
+# If you enable more tests in the config below you'll also need to update TARGETS above.
+cat <<EOF > vmtest.toml
+[[target]]
+name = "x86 mm selftests"
+kernel = "${kernel}"
+kernel_args = "asi=on pti=off"
+# Doesn't work, dunno why:
+# KSELFTEST_RUN_VMTESTS_SH_ARGS="-t mmap" /mnt/kselftest_install/run_kselftest.sh --test mm:run_vmtests.sh
+# All of these have test failures and you can't disable individual tests:
+# ./run_vmtests.sh -t mmap
+# ./run_vmtests.sh -t gup_test
+# ./run_vmtests.sh -t mlock
+# Flaky:
+# ./run_vmtests.sh -t mremap
+# Doesn't work at all:
+# ./run_vmtests.sh -t userfaultfd
+# Require kernel config changes:
+# ./run_vmtests.sh -t "vmalloc hmm ksm"
+command = \"""
+./run_vmtests.sh -t cow
+cd /mnt/kselftest_install/mm/
+\"""
+
+[target.vm.mounts]
+"/mnt/kselftest_install" = { host_path = "./tools/testing/selftests/kselftest_install" }
+EOF
+
+vmtest --config vmtest.toml
+"""
+
+# Not sure why this is failing,
+# make[9]: *** No rule to make target '/tmp/local-ci-worktreeED0q6g/tools/include/linux/compiler.h', needed by '/tmp/bindep-pkg-asi/out/b1a95caadfa1fa9b9bb9ff90b5ce9d12c7170e7e/tools/objtool/libsubcmd/exec-cmd.o'.  Stop.
+# [[tests]]
+# name = "bindeb-pkg-asi"
+# command = """
+# set -e
+# exec 2>&1
+#
+# git clean -fdx -e .vscode # mrproper isn't always good enough
+#
+# # Hack: we don't get to write to the artifact output directory nor have a temp
+# # directory that is cleaned up. So we use a special tmpdir and then delort it
+# # afterwards. Otherwise you can very quickly generated many hundreds of
+# # goobibytes and fill yer disk.
+# # TODO maybe there's actually a way to get it to drop the bindeb-pkg directly
+# # into the directory but build locally in-tree instead of with O=?
+# OUTPUT=/tmp/bindep-pkg-asi/out/$LIMMAT_COMMIT
+# mkdir -p $OUTPUT
+# cp ~/src/linux/config-ubuntu-6.10-asi $OUTPUT/.config
+# make O=$OUTPUT olddefconfig
+# make -sj8 bindeb-pkg CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= O=$OUTPUT
+# rm -rf $OUTPUT
+# """
+
+[[tests]]
+name = "gbuild2"
+requires_worktree = false
+resources = ["kbs"]
+command = "gbuild2 --remote --noneed_local_outputs GTESTS=1 CONFIG=dbg --commit=$LIMMAT_COMMIT 2>&1"
+
+[[tests]]
+name = "gbuild2-kdump"
+requires_worktree = false
+resources = ["kbs"]
+command = "gbuild2 --remote --noneed_local_outputs GTESTS=1 CONFIG=kdump --commit=$LIMMAT_COMMIT 2>&1"
+
+# Mysteriously broken, I dunno, I think Kokonut + DevRez + NodeOS might just be
+# a waste of energy.
+#
+# [[tests]]
+# name = "boot-devrez"
+# command = """
+# set -eu
+# exec 2>&1
+# # Hack: kill self with a signal so we produce an error instead of a failure.
+# gcertstatus --format=miba | grep kernel-development || kill SIGSEGV $$
+# machine=$(cat ~/.$LIMMAT_RESOURCE_devrez_skylake_0)
+# # Hack: kill self with a signal so we produce an error instead of a failure.
+# reservation.par ls | grep $machine || kill SIGSEGV $$
+# gbuild2_remote=/google/src/head/depot/google3/experimental/users/jackmanb/prodkernel_hacks/gbuild2_remote.sh
+# kernel=$($gbuild2_remote --commit=$LIMMAT_COMMIT GTESTS=1 CONFIG=dbg)
+# kokonut test --test_machines=sabfi7 --use_gtests_from_kernel --manual --use_ssh \
+#     --use_g3cache=false --copy_only_needed_gtests --kernel=$kernel --borglet_healthy_timeout=0 //selftests:proc:self
+# """
+
+
+[[tests]]
+name = "asi-kunit-qemu"
+command = """
+set -e
+exec 2>&1
+[ -f arch/x86/mm/.kunitconfig ] || exit 0
+git clean -fdx -e .vscode >/dev/null # mrproper isn't always good enough
+tools/testing/kunit/kunit.py run --arch=x86_64 --timeout=10 \
+    --jobs=8 --kunitconfig=arch/x86/mm/.kunitconfig --qemu_args "-smp 2" \
+    --make_options "LLVM=1" --make_options "CC=ccache clang" --kernel_args "asi=on panic_on_warn=1"
+"""
+cache = "by_tree"
