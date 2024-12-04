@@ -77,8 +77,8 @@ kernel_args = "asi=on pti=off"
 # Require kernel config changes:
 # ./run_vmtests.sh -t "vmalloc hmm ksm"
 command = \"""
-./run_vmtests.sh -t cow
 cd /mnt/kselftest_install/mm/
+./run_vmtests.sh -t cow
 \"""
 
 [target.vm.mounts]
