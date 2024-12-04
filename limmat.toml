@@ -30,7 +30,9 @@ exec 2>&1
 
 cp ~/src/limmat-kernel/config-6.12-asi-aethelred .config
 make -j olddefconfig
-grep ADDRESS_SPACE_ISOLATION .config
+if git grep ADDRESS_SPACE_ISOLATION; then
+    grep ADDRESS_SPACE_ISOLATION .config
+fi
 CCACHE_SLOPPINESS=time_macros make -sj8 bzImage CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
 make kernelrelease > $LIMMAT_ARTIFACTS/kernelrelease.txt
 cp arch/x86/boot/bzImage $LIMMAT_ARTIFACTS
