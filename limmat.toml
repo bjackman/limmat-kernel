@@ -8,7 +8,9 @@ resources = [
 [[tests]]
 name = "bzImage_defconfig"
 command = """
-set -eu
+set -eux
+exec 2>&1
+
 make -sj8 defconfig
 scripts/config -e CONFIG_LOCALVERSION_AUTO -e CONFIG_IKCONFIG -e CONFIG_IKCONFIG_PROC \
     -e CONFIG_DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT -e DEBUG_ENTRY
@@ -23,7 +25,9 @@ cp arch/x86/boot/bzImage $LIMMAT_ARTIFACTS
 [[tests]]
 name = "bzImage_asi"
 command = """
-set -eu
+set -eux
+exec 2>&1
+
 cp ~/src/limmat-kernel/config-6.12-asi-aethelred .config
 make -j olddefconfig
 grep ADDRESS_SPACE_ISOLATION .config
