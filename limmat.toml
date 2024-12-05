@@ -83,11 +83,13 @@ cat <<EOF > vmtest.toml
 [[target]]
 name = "vmtest boot - host rootfs"
 kernel = "${kernel}"
+rootfs = "/usr/local/google/home/jackmanb/src/limmat-kernel/mkosi-rootfs/image"
 kernel_args = "asi=on pti=off"
 command = "exit 0"
 EOF
 
-vmtest --config vmtest.toml
+# unshare -r makes vmtest see the rootfs as if the files are owned by root.
+unshare -r vmtest --config vmtest.toml
 """
 
 # Not sure why this is failing,
@@ -158,20 +160,3 @@ tools/testing/kunit/kunit.py run --arch=x86_64 --timeout=10 \
     --make_options "LLVM=1" --make_options "CC=ccache clang" --kernel_args "asi=on panic_on_warn=1"
 """
 cache = "by_tree"
-
-# Hmm, I started this but then realised I need to be able to boot the image and
-# shut down when it succeeds, which is best done with vmtest.
-# But when I vmtest boot the image from mkosi it just silently hangs, I guess I
-# need to figure out the difference in the QEMU commands wrt mkosi qemu.
-# [[tests]]
-# name = "boot-mkosi-img"
-# depends_on = ["bzImage_asi"]
-# command = """
-# exec 2>&1
-# set -eux
-# # TODO: mkosi-rootfs dir should be a proper input to the test.
-# # -C and -O mean to use that config but put the output in the current directory.
-# # This still seems to use the cache directory relative to the config file.
-# mkosi -f -C ~/src/limmat-kernel/mkosi-rootfs -O $PWD   \
-#     --build-sources="$LIMMAT_ARTIFACTS_bzImage_asi":kernel qemu
-# """
