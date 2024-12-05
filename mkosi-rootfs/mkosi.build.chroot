@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -eux
+
+ls -R /work/src
+
+# /mnt/kernel should be set up by passing --build-sources to mkosi.
+kernelrelease=$(cat /work/src/kernel/kernelrelease.txt)
+kdir=$DESTDIR/usr/lib/modules/$kernelrelease
+mkdir -p $kdir
+cp /work/src/kernel/bzImage $kdir/vmlinuz
