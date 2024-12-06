@@ -7,6 +7,7 @@ resources = [
 
 [[tests]]
 name = "bzImage_defconfig"
+cache = "by_tree"
 command = """
 set -eux
 exec 2>&1
@@ -24,6 +25,7 @@ cp arch/x86/boot/bzImage $LIMMAT_ARTIFACTS
 # It's also a very heavy config, that's so I can boot it on my hardware in the office.
 [[tests]]
 name = "bzImage_asi"
+cache = "by_tree"
 command = """
 set -eux
 exec 2>&1
@@ -67,6 +69,7 @@ cp arch/x86/boot/bzImage $LIMMAT_ARTIFACTS
 # "/mnt/kselftest_install" = { host_path = "./tools/testing/selftests/kselftest_install" }
 [[tests]]
 name = "vmtests-boot-asi"
+cache = "by_tree"
 depends_on = ["bzImage_asi"]
 command = """
 set -eux
@@ -150,6 +153,7 @@ command = "gbuild2 --remote --noneed_local_outputs GTESTS=1 CONFIG=kdump --commi
 
 [[tests]]
 name = "asi-kunit-qemu"
+cache = "by_tree"
 command = """
 set -e
 exec 2>&1
@@ -159,4 +163,3 @@ tools/testing/kunit/kunit.py run --arch=x86_64 --timeout=10 \
     --jobs=8 --kunitconfig=arch/x86/mm/.kunitconfig --qemu_args "-smp 2" \
     --make_options "LLVM=1" --make_options "CC=ccache clang" --kernel_args "asi=on panic_on_warn=1"
 """
-cache = "by_tree"
