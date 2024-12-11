@@ -163,3 +163,14 @@ tools/testing/kunit/kunit.py run --arch=x86_64 --timeout=10 \
     --jobs=8 --kunitconfig=arch/x86/mm/.kunitconfig --qemu_args "-smp 2" \
     --make_options "LLVM=1" --make_options "CC=ccache clang" --kernel_args "asi=on panic_on_warn=1"
 """
+
+[[tests]]
+name = "checkpatch"
+requires_worktree = false # Just run whatever version of checkpatch is currently in the main worktree.
+cache = "by_commit"
+command = """
+set -ex
+exec 2>&1
+scripts/checkpatch.pl --git $LIMMAT_COMMIT --ignore=GERRIT_CHANGE_ID,FILE_PATH_CHANGES,AVOID_BUG \
+    --show-types $(git log -n1 --format='%(trailers:key=Checkpatch-args,valueonly)' $LIMMAT_COMMIT)
+"""
