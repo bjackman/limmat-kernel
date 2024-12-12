@@ -171,6 +171,17 @@ cache = "by_commit"
 command = """
 set -ex
 exec 2>&1
+
+# Linus doesn't sign off his release commits lol.
+if $(git log -n1 $LIMMAT_COMMIT --format:"%an") == "Linus Torvalds"; then
+    exit 0
+fi
+
+# Don't complain about b4 cover-letter commits.
+if git log -n1 $LIMMAT_COMMIT --format="%B" | grep -q -- "--- b4-submit-tracking ---"; then
+    exit 0
+fi
+
 scripts/checkpatch.pl --git $LIMMAT_COMMIT --ignore=GERRIT_CHANGE_ID,FILE_PATH_CHANGES,AVOID_BUG \
     --show-types $(git log -n1 --format='%(trailers:key=Checkpatch-args,valueonly)' $LIMMAT_COMMIT)
 """
