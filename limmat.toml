@@ -3,6 +3,8 @@ num_worktrees = 8
 resources = [
     { name = "kbs", count = 8 },
     { name = "devrez_machine", count = 1 },
+    # Don't spin up a billion VMs at once
+    { name = "qemu_throttle", count = 8 },
 ]
 
 [[tests]]
@@ -76,6 +78,8 @@ cp .config $LIMMAT_ARTIFACTS/config.txt
 name = "vmtests-boot-asi"
 cache = "by_tree"
 depends_on = ["bzImage_asi"]
+resources = ["qemu_throttle"]
+requires_worktree = false
 command = """
 set -eux
 exec 2>&1
