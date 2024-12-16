@@ -21,6 +21,7 @@ Tested on 24.04.1:
 - `pipx install git+https://github.com/systemd/mkosi.git`
     - TODO: Figure out AppArmor thing.
 - [Install cargo] and `cargo install vmtest`
+    - TODO: And also for vmtest...
 - Go to kernel directory
 - `export LIMMAT_CONFIG=/path/to/this/repo/limmat.toml`
 - `limmat watch origin/master` (or whatever other base branch).
