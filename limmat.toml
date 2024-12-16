@@ -173,5 +173,14 @@ if git log -n1 $LIMMAT_COMMIT --format="%B" | grep -q -- "--- b4-submit-tracking
 fi
 
 scripts/checkpatch.pl --git $LIMMAT_COMMIT --ignore=GERRIT_CHANGE_ID,FILE_PATH_CHANGES,AVOID_BUG \
-    --show-types $(git log -n1 --format='%(trailers:key=Checkpatch-args,valueonly)' $LIMMAT_COMMIT)
+    --codespell --show-types $(git log -n1 --format='%(trailers:key=Checkpatch-args,valueonly)' $LIMMAT_COMMIT)
+
+if git show $LIMMAT_COMMIT | grep -q '\\+.*TODO'; then
+    echo "TODO added to code"
+    exit 1
+fi
+if git log -n 1 --format=%B $LIMMAT_COMMIT | grep -q TODO; then
+    echo "TODO in commit message"
+    exit 1
+fi
 """
