@@ -36,7 +36,7 @@ exec 2>&1
 cp ~/src/limmat-kernel/config-6.12-asi-aethelred .config
 scripts/config -e VMLINUX_OBJTOOL_STRICT
 make -j olddefconfig
-if git grep ADDRESS_SPACE_ISOLATION; then
+if git grep -q ADDRESS_SPACE_ISOLATION ":!gconfigs/*"; then
     grep ADDRESS_SPACE_ISOLATION .config
 fi
 CCACHE_SLOPPINESS=time_macros make -sj8 bzImage CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
