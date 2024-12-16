@@ -48,7 +48,7 @@ cp .config $LIMMAT_ARTIFACTS/config.txt
 
 # I fixed https://github.com/danobi/vmtest/issues/96.
 # I can't find any kselftests that actually work lol (I think the BPF selftests
-# work but I can't figure out how to build them).
+# work but I can't figure out how to run them).
 # So, just boot the bloody thing.
 # This does it using the host rootfs.
 #
@@ -135,26 +135,6 @@ name = "gbuild2-kdump"
 requires_worktree = false
 resources = ["kbs"]
 command = "gbuild2 --remote --noneed_local_outputs GTESTS=1 CONFIG=kdump --commit=$LIMMAT_COMMIT 2>&1"
-
-# Mysteriously broken, I dunno, I think Kokonut + DevRez + NodeOS might just be
-# a waste of energy.
-#
-# [[tests]]
-# name = "boot-devrez"
-# command = """
-# set -eu
-# exec 2>&1
-# # Hack: kill self with a signal so we produce an error instead of a failure.
-# gcertstatus --format=miba | grep kernel-development || kill SIGSEGV $$
-# machine=$(cat ~/.$LIMMAT_RESOURCE_devrez_skylake_0)
-# # Hack: kill self with a signal so we produce an error instead of a failure.
-# reservation.par ls | grep $machine || kill SIGSEGV $$
-# gbuild2_remote=/google/src/head/depot/google3/experimental/users/jackmanb/prodkernel_hacks/gbuild2_remote.sh
-# kernel=$($gbuild2_remote --commit=$LIMMAT_COMMIT GTESTS=1 CONFIG=dbg)
-# kokonut test --test_machines=sabfi7 --use_gtests_from_kernel --manual --use_ssh \
-#     --use_g3cache=false --copy_only_needed_gtests --kernel=$kernel --borglet_healthy_timeout=0 //selftests:proc:self
-# """
-
 
 [[tests]]
 name = "asi-kunit-qemu"
