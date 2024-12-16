@@ -162,7 +162,8 @@ set -ex
 exec 2>&1
 
 # Linus doesn't sign off his release commits lol.
-if $(git log -n1 $LIMMAT_COMMIT --format:"%an") == "Linus Torvalds"; then
+author="$(git log -n1 $LIMMAT_COMMIT --format=%an)"
+if [[ "$author" == "Linus Torvalds" ]]; then
     exit 0
 fi
 
