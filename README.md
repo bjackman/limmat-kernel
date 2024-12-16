@@ -12,3 +12,15 @@ TODO: This won't work unless it's stored at `~/src/limmat-kernel`. Need to add a
 Limmat feature to avoid this problem.
 
 TODO: Figure out what does and doesn't work on my home computer.
+
+## Using on Ubuntu
+
+Tested on 24.04.1:
+
+- `sudo apt install pipx && pipx ensurepath`
+- `pipx install git+https://github.com/systemd/mkosi.git`
+    - TODO: Figure out AppArmor thing.
+- [Install cargo] and `cargo install vmtest`
+- Go to kernel directory
+- `export LIMMAT_CONFIG=/path/to/this/repo/limmat.toml`
+- `limmat watch origin/master` (or whatever other base branch).
