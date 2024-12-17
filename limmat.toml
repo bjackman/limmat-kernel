@@ -185,18 +185,6 @@ unshare -r vmtest --config vmtest.toml
 # """
 
 [[tests]]
-name = "gbuild2"
-requires_worktree = false
-resources = ["kbs"]
-command = "gbuild2 --remote --noneed_local_outputs GTESTS=1 CONFIG=dbg --commit=$LIMMAT_COMMIT 2>&1"
-
-[[tests]]
-name = "gbuild2-kdump"
-requires_worktree = false
-resources = ["kbs"]
-command = "gbuild2 --remote --noneed_local_outputs GTESTS=1 CONFIG=kdump --commit=$LIMMAT_COMMIT 2>&1"
-
-[[tests]]
 name = "asi_kunit_build"
 cache = "by_tree"
 command = """
