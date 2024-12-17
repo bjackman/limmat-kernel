@@ -201,7 +201,7 @@ name = "asi_kunit_tcg"
 cache = "by_tree"
 depends_on = ["asi_kunit_build"]
 command = """
-set -e
+set -ex
 exec 2>&1
 [ -e $LIMMAT_ARTIFACTS_asi_kunit_build/arch/x86/boot/bzImage ] || exit 0
 
@@ -217,7 +217,7 @@ name = "asi_kunit_kvm"
 cache = "by_tree"
 depends_on = ["asi_kunit_build"]
 command = """
-set -e
+set -ex
 exec 2>&1
 [ -e $LIMMAT_ARTIFACTS_asi_kunit_build/arch/x86/boot/bzImage ] || exit 0
 
