@@ -136,7 +136,7 @@ cat <<EOF > vmtest.toml
 [[target]]
 name = "vmtest boot - host rootfs"
 kernel = "${kernel}"
-rootfs = "/usr/local/google/home/jackmanb/src/limmat-kernel/mkosi-rootfs/image"
+rootfs = "$HOME/src/limmat-kernel/mkosi-rootfs/image"
 kernel_args = "asi=on pti=off"
 command = \"""
 set -x
