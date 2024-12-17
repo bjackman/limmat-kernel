@@ -141,16 +141,50 @@ resources = ["kbs"]
 command = "gbuild2 --remote --noneed_local_outputs GTESTS=1 CONFIG=kdump --commit=$LIMMAT_COMMIT 2>&1"
 
 [[tests]]
-name = "asi-kunit-qemu"
+name = "asi_kunit_build"
 cache = "by_tree"
 command = """
 set -e
 exec 2>&1
 [ -f arch/x86/mm/.kunitconfig ] || exit 0
 git clean -fdx -e .vscode >/dev/null # mrproper isn't always good enough
-tools/testing/kunit/kunit.py run --arch=x86_64 --timeout=10 \
-    --jobs=8 --kunitconfig=arch/x86/mm/.kunitconfig --qemu_args "-smp 2" \
-    --make_options "LLVM=1" --make_options "CC=ccache clang" --kernel_args "asi=on panic_on_warn=1"
+
+tools/testing/kunit/kunit.py build --arch=x86_64  \
+    --jobs=8 --kunitconfig=arch/x86/mm/.kunitconfig  \
+    --make_options "LLVM=1" --make_options "CC=ccache clang"
+
+mkdir -p $LIMMAT_ARTIFACTS/arch/x86/boot/
+cp .kunit/arch/x86/boot/bzImage $LIMMAT_ARTIFACTS/arch/x86/boot/
+"""
+
+[[tests]]
+name = "asi_kunit_tcg"
+cache = "by_tree"
+depends_on = ["asi_kunit_build"]
+command = """
+set -e
+exec 2>&1
+[ -e $LIMMAT_ARTIFACTS_asi_kunit_build/arch/x86/boot/bzImage ] || exit 0
+
+tools/testing/kunit/kunit.py exec --arch=x86_64 --timeout=10 \
+    --kunitconfig=arch/x86/mm/.kunitconfig --qemu_args "-smp 2" \
+    --kernel_args "asi=on panic_on_warn=1"
+"""
+
+# We often see test failures that only reproduce under TCG or KVM, presumably
+# since that changes the timing characteristics so much. So, just run both.
+[[tests]]
+name = "asi_kunit_kvm"
+cache = "by_tree"
+depends_on = ["asi_kunit_build"]
+command = """
+set -e
+exec 2>&1
+[ -e $LIMMAT_ARTIFACTS_asi_kunit_build/arch/x86/boot/bzImage ] || exit 0
+
+tools/testing/kunit/kunit.py exec --arch=x86_64 --timeout=10 \
+    --kunitconfig=arch/x86/mm/.kunitconfig --qemu_args "-smp 2 --enable-kvm" \
+    --kernel_args "asi=on panic_on_warn=1"
 """
 
 [[tests]]
