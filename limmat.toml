@@ -86,17 +86,19 @@ cp arch/x86/boot/bzImage $LIMMAT_ARTIFACTS
 cp .config $LIMMAT_ARTIFACTS/config.txt
 """
 
+[[tests]]
+name = "build_kselftests"
+cache = "by_tree"
+command = """
+set -eux
+exec 2>&1
 
-# I fixed https://github.com/danobi/vmtest/issues/96.
-# I can't find any kselftests that actually work lol (I think the BPF selftests
-# work but I can't figure out how to run them).
-# So, just boot the bloody thing.
-# This does it using the host rootfs.
-#
-# Commands I tried that didn't work:
-# cd /mnt/kselftest_install/mm/
-# KSELFTEST_RUN_VMTESTS_SH_ARGS="-t mmap" /mnt/kselftest_install/run_kselftest.sh --test mm:run_vmtests.sh
-# All of these have test failures and you can't disable individual tests:
+make -sj8 headers
+make -sj100 CC='ccache gcc' -C tools/testing/selftests \
+  TARGETS=kvm LDFLAGS=-static install INSTALL_PATH=$LIMMAT_ARTIFACTS
+"""
+
+# Commands I tried that didn't work (TARGETS=mm)
 # Some of them might pass on certain platforms, have only tried with gLinux host rootfs.
 # ./run_vmtests.sh -t mmap
 # ./run_vmtests.sh -t gup_test
@@ -108,15 +110,15 @@ cp .config $LIMMAT_ARTIFACTS/config.txt
 # ./run_vmtests.sh -t userfaultfd
 # Require kernel config changes:
 # ./run_vmtests.sh -t "vmalloc hmm ksm"
-#
-# make -sj8 CC='ccache gcc' headers
-# make -sj8 CC='ccache gcc' -C tools/testing/selftests install TARGETS=mm
-# [target.vm.mounts]
-# "/mnt/kselftest_install" = { host_path = "./tools/testing/selftests/kselftest_install" }
+
+# I tried before with mm tests, which can be run via run_vmtests.sh, but they're
+# completely broken.
+# Several KVM tests fail in QEMU and kselftest doesn't offer a way to skip
+# tests, so for now just run a small selection.
 [[tests]]
-name = "vmtests-boot-asi"
+name = "vmtests-kvm-asi"
 cache = "by_tree"
-depends_on = ["bzImage_asi"]
+depends_on = ["bzImage_asi", "build_kselftests"]
 resources = ["qemu_throttle"]
 requires_worktree = false
 command = """
@@ -136,7 +138,22 @@ name = "vmtest boot - host rootfs"
 kernel = "${kernel}"
 rootfs = "/usr/local/google/home/jackmanb/src/limmat-kernel/mkosi-rootfs/image"
 kernel_args = "asi=on pti=off"
-command = "exit 0"
+command = \"""
+set -x
+/mnt/kselftest_install/run_kselftest.sh --per-test-log \
+    -t kvm:pre_fault_memory_test -t kvm:kvm_create_max_vcpus -t kvm:userspace_io_test \
+    | tee /tmp/kselftest.log
+
+# --per-test-log drops everything directly in /tmp.
+cp /tmp/* /mnt/kselftest_logs
+# run_kselftest.sh doesn't fail when tests fail. Grep log instead.
+if grep "not ok" /tmp/kselftest.log; then exit 1; fi
+exit 0
+\"""
+[target.vm.mounts]
+"/mnt/kselftest_install" = { host_path = "$LIMMAT_ARTIFACTS_build_kselftests" }
+"/mnt/kselftest_logs" = { host_path = "$LIMMAT_ARTIFACTS", writable = true }
+
 EOF
 
 # unshare -r makes vmtest see the rootfs as if the files are owned by root.
