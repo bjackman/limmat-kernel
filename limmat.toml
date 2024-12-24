@@ -1,10 +1,10 @@
-num_worktrees = 8
+num_worktrees = 2
 
 resources = [
     { name = "kbs", count = 8 },
     { name = "devrez_machine", count = 1 },
     # Don't spin up a billion VMs at once
-    { name = "qemu_throttle", count = 8 },
+    { name = "qemu_throttle", count = 2 },
 ]
 
 # Don't need this at the moment, save the CPU bandwidth.
@@ -16,13 +16,13 @@ resources = [
 # set -eux
 # exec 2>&1
 
-# make -sj8 defconfig
+# make -sj2 defconfig
 # scripts/config -e CONFIG_LOCALVERSION_AUTO -e CONFIG_IKCONFIG -e CONFIG_IKCONFIG_PROC \
 #     -e CONFIG_DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT -e DEBUG_ENTRY
 # # Note this config is added by my kernel patch
 # scripts/config -e VMLINUX_OBJTOOL_STRICT
-# make -j olddefconfig
-# CCACHE_SLOPPINESS=time_macros make -sj8 bzImage CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
+# make olddefconfig
+# CCACHE_SLOPPINESS=time_macros make -sj2 bzImage CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
 # make kernelrelease > $LIMMAT_ARTIFACTS/kernelrelease.txt
 # cp arch/x86/boot/bzImage $LIMMAT_ARTIFACTS
 # cp .config $LIMMAT_ARTIFACTS/config.txt
@@ -35,9 +35,9 @@ command = """
 set -eux
 exec 2>&1
 
-make -j tinyconfig
+make -j2 tinyconfig
 scripts/config -e VMLINUX_OBJTOOL_STRICT
-CCACHE_SLOPPINESS=time_macros make -sj8 vmlinux CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
+CCACHE_SLOPPINESS=time_macros make -sj2 vmlinux CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
 """
 
 # Quick feedback for build failures
@@ -48,7 +48,7 @@ command = """
 set -eux
 exec 2>&1
 
-make -j tinyconfig
+make -j2 tinyconfig
 scripts/config -e "64BIT" -e CPU_MITIGATIONS \
         -e VIRTUALIZATION -e KVM -e KVM_INTEL -e KVM_AMD \
         -d HYPERV -d CONFIG_PARAVIRT -e MITIGATION_ADDRESS_SPACE_ISOLATION
@@ -58,7 +58,7 @@ scripts/config -e VMLINUX_OBJTOOL_STRICT
 if git grep -q ADDRESS_SPACE_ISOLATION ":!gconfigs/*"; then
     grep ADDRESS_SPACE_ISOLATION .config
 fi
-CCACHE_SLOPPINESS=time_macros make -sj8 vmlinux CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
+CCACHE_SLOPPINESS=time_macros make -sj2 vmlinux CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
 """
 
 # TODO: This hardcodes the location of the kconfig file.
@@ -71,16 +71,16 @@ set -eux
 exec 2>&1
 
 # TODO: we can probably use a smaller config, but my manual hacking didn't work with vmtest.
-make -j defconfig
+makedefconfig
 scripts/config -e VMLINUX_OBJTOOL_STRICT
 scripts/config -e "64BIT" -e CPU_MITIGATIONS \
         -e VIRTUALIZATION -e KVM -e KVM_INTEL -e KVM_AMD \
         -d HYPERV -d CONFIG_PARAVIRT -e MITIGATION_ADDRESS_SPACE_ISOLATION
-make -j olddefconfig
+make olddefconfig
 if git grep -q ADDRESS_SPACE_ISOLATION ":!gconfigs/*"; then
     grep ADDRESS_SPACE_ISOLATION .config
 fi
-CCACHE_SLOPPINESS=time_macros make -sj8 bzImage CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
+CCACHE_SLOPPINESS=time_macros make -sj2 bzImage CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
 make kernelrelease > $LIMMAT_ARTIFACTS/kernelrelease.txt
 cp arch/x86/boot/bzImage $LIMMAT_ARTIFACTS
 cp .config $LIMMAT_ARTIFACTS/config.txt
@@ -93,7 +93,7 @@ command = """
 set -eux
 exec 2>&1
 
-make -sj8 headers
+make -sj2 headers
 make -sj100 CC='ccache gcc' -C tools/testing/selftests \
   TARGETS=kvm LDFLAGS=-static install INSTALL_PATH=$LIMMAT_ARTIFACTS
 """
