@@ -17,7 +17,7 @@ TODO: Figure out what does and doesn't work on my home computer.
 
 Tested on 24.04.1:
 
-- `sudo apt install ccache`
+- `sudo apt install ccache debian-archive-keyrying`
 - `sudo apt install pipx && pipx ensurepath`
 - `pipx install git+https://github.com/systemd/mkosi.git`
     - TODO: Figure out AppArmor thing.
