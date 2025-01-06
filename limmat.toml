@@ -251,8 +251,14 @@ if git log -n1 $LIMMAT_COMMIT --format="%B" | grep -q -- "--- b4-submit-tracking
     exit 0
 fi
 
-scripts/checkpatch.pl --git $LIMMAT_COMMIT --ignore=GERRIT_CHANGE_ID,FILE_PATH_CHANGES,AVOID_BUG \
-    --codespell --show-types $(git log -n1 --format='%(trailers:key=Checkpatch-args,valueonly)' $LIMMAT_COMMIT)
+# Ignore more stuff on Google prodkernel trees.
+if [[ -e ./gconfigs ]]; then
+    PRODKERNEL_IGNORE=--ignore=GIT_COMMIT_ID,MISSING_SIGN_OFF
+fi
+
+scripts/checkpatch.pl --git $LIMMAT_COMMIT --codespell --show-types \
+    --ignore=GERRIT_CHANGE_ID,FILE_PATH_CHANGES,AVOID_BUG "$PRODKERNEL_IGNORE" \
+    $(git log -n1 --format='%(trailers:key=Checkpatch-args,valueonly)' $LIMMAT_COMMIT)
 
 if git show $LIMMAT_COMMIT | grep -q '\\+.*TODO'; then
     echo "TODO added to code"
