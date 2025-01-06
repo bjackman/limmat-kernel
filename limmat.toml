@@ -159,30 +159,6 @@ EOF
 unshare -r vmtest --config vmtest.toml
 """
 
-# Not sure why this is failing,
-# make[9]: *** No rule to make target '/tmp/local-ci-worktreeED0q6g/tools/include/linux/compiler.h', needed by '/tmp/bindep-pkg-asi/out/b1a95caadfa1fa9b9bb9ff90b5ce9d12c7170e7e/tools/objtool/libsubcmd/exec-cmd.o'.  Stop.
-# [[tests]]
-# name = "bindeb-pkg-asi"
-# command = """
-# set -e
-# exec 2>&1
-#
-# git clean -fdx -e .vscode # mrproper isn't always good enough
-#
-# # Hack: we don't get to write to the artifact output directory nor have a temp
-# # directory that is cleaned up. So we use a special tmpdir and then delort it
-# # afterwards. Otherwise you can very quickly generated many hundreds of
-# # goobibytes and fill yer disk.
-# # TODO maybe there's actually a way to get it to drop the bindeb-pkg directly
-# # into the directory but build locally in-tree instead of with O=?
-# OUTPUT=/tmp/bindep-pkg-asi/out/$LIMMAT_COMMIT
-# mkdir -p $OUTPUT
-# cp ~/src/linux/config-ubuntu-6.10-asi $OUTPUT/.config
-# make O=$OUTPUT olddefconfig
-# make -sj8 bindeb-pkg CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= O=$OUTPUT
-# rm -rf $OUTPUT
-# """
-
 [[tests]]
 name = "asi_kunit_build"
 cache = "by_tree"
