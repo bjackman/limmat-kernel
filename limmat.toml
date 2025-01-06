@@ -61,7 +61,6 @@ fi
 CCACHE_SLOPPINESS=time_macros make -sj8 vmlinux CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
 """
 
-# TODO: This hardcodes the location of the kconfig file.
 [[tests]]
 name = "bzImage_asi"
 cache = "by_tree"
