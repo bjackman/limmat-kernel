@@ -115,7 +115,7 @@ make -sj100 CC='ccache gcc' -C tools/testing/selftests \
 # Several KVM tests fail in QEMU and kselftest doesn't offer a way to skip
 # tests, so for now just run a small selection.
 [[tests]]
-name = "vmtests-kvm-asi"
+name = "vmtest-kvm-asi"
 cache = "by_tree"
 depends_on = ["bzImage_asi", "build_kselftests"]
 resources = ["qemu_throttle"]
