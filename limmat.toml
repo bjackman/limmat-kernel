@@ -138,7 +138,9 @@ kernel = "${kernel}"
 rootfs = "$HOME/src/limmat-kernel/mkosi-rootfs/image"
 kernel_args = "asi=on pti=off"
 command = \"""
-set -x
+set -ex
+set -o pipefail
+
 /mnt/kselftest_install/run_kselftest.sh --per-test-log \
     -t kvm:pre_fault_memory_test -t kvm:kvm_create_max_vcpus -t kvm:userspace_io_test \
     | tee /tmp/kselftest.log
