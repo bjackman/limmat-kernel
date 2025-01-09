@@ -141,12 +141,12 @@ command = \"""
 set -ex
 set -o pipefail
 
-/mnt/kselftest_install/run_kselftest.sh --per-test-log \
+# We actually want --per-test-log but I wanna be able to test on kernels before that flag existed.
+# --summary will try to write to /mnt/kselftest_install which is read-only so that doesn't work either.
+/mnt/kselftest_install/run_kselftest.sh \
     -t kvm:kvm_create_max_vcpus -t kvm:userspace_io_test \
     | tee /tmp/kselftest.log
 
-# --per-test-log drops everything directly in /tmp.
-cp /tmp/* /mnt/kselftest_logs
 # run_kselftest.sh doesn't fail when tests fail. Grep log instead.
 if grep "not ok" /tmp/kselftest.log; then exit 1; fi
 exit 0
