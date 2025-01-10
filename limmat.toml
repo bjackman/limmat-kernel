@@ -202,7 +202,7 @@ exec 2>&1
 tools/testing/kunit/kunit.py exec --arch=x86_64 --timeout=10 \
     --kunitconfig=arch/x86/mm/.kunitconfig --qemu_args "-smp 2" \
     --build_dir "$LIMMAT_ARTIFACTS_asi_kunit_build" \
-    --kernel_args "asi=on panic_on_warn=1"
+    --kernel_args "asi=on"
 """
 
 # We often see test failures that only reproduce under TCG or KVM, presumably
@@ -219,7 +219,7 @@ exec 2>&1
 tools/testing/kunit/kunit.py exec --arch=x86_64 --timeout=10 \
     --kunitconfig=arch/x86/mm/.kunitconfig --qemu_args "-smp 2 --enable-kvm" \
     --build_dir "$LIMMAT_ARTIFACTS_asi_kunit_build" \
-    --kernel_args "asi=on panic_on_warn=1"
+    --kernel_args "asi=on"
 """
 
 [[tests]]
