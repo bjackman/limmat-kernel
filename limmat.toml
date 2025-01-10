@@ -36,7 +36,7 @@ set -eux
 exec 2>&1
 
 make -j tinyconfig
-scripts/config -e 64BIT
+scripts/config -e 64BIT -e -WERROR
 make -j olddefconfig
 scripts/config -e VMLINUX_OBJTOOL_STRICT
 CCACHE_SLOPPINESS=time_macros make -sj8 vmlinux CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
@@ -51,7 +51,7 @@ set -eux
 exec 2>&1
 
 make -j tinyconfig
-scripts/config -e "64BIT" -e CPU_MITIGATIONS \
+scripts/config -e "64BIT" -e WERROR -e CPU_MITIGATIONS \
         -e VIRTUALIZATION -e KVM -e KVM_INTEL -e KVM_AMD \
         -d HYPERV -d CONFIG_PARAVIRT -e MITIGATION_ADDRESS_SPACE_ISOLATION
 
