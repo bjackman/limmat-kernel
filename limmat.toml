@@ -36,6 +36,8 @@ set -eux
 exec 2>&1
 
 make -j tinyconfig
+scripts/config -e 64BIT
+make -j olddefconfig
 scripts/config -e VMLINUX_OBJTOOL_STRICT
 CCACHE_SLOPPINESS=time_macros make -sj8 vmlinux CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
 """
