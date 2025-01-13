@@ -12,6 +12,8 @@ functionality.
 
 TODO: I don't think the `vmtest` stuff works on Ubuntu due to AppArmor issues.
 
+TODO: Should drop all the ASI stuff too, that's just confusing.
+
 ## Using on Debian
 
 ```sh
