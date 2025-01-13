@@ -4,7 +4,7 @@ This is my config for [Limmat](https://github.com/bjackman/limmat) for kernel
 development. It's not very hermetic, it can serve as inspiration but don't expect
 everything to Just Work on your system too.
 
-TODO: Figure out Ubuntu AppArmor issue then update docs below.
+TODO: I don't think the `vmtest` stuff works on Ubuntu due to AppArmor issues.
 
 ## Using on Debian
 
@@ -24,9 +24,7 @@ sudo apt install build-essential linux-source bc kmod cpio flex \
 
 export LIMMAT_CONFIG=$HOME/src/limmat-kernel/limmat.toml
 
-# Download the rootfs used for QEMU testing. (If you have mkosi installed, you
-# could just run that in the mkosi-rootfs/ dir instead of downloading the
-# prebuilt one).
+# Download the rootfs used for QEMU testing. (or see below to build it yourself).
 cd $(dirname $LIMMAT_CONFIG)/mkosi-rootfs/
 wget https://github.com/bjackman/limmat-kernel/releases/download/v0.1/image.tar.zst
 mkdir image && tar --use-compress-program=unzstd -xf image.tar.zst -C image
@@ -35,20 +33,13 @@ cd path/to/kernel/tree
 limmat watch origin/master  # Assuming origin/master is your base branch.
 ```
 
-As well as Limmat, you need [vmtest](https://github.com/danobi/vmtest)
-installed. You also need to run [mkosi](https://github.com/systemd/mkosi) in the
-`mkosi-rootfs/` directory of this repo for things to work.
+## Building rootfs for kselftest.
 
-## Using on Ubuntu
+A pre-built version is provided in the releases. To build it youself:
 
-Tested on 24.04.1:
+(Tested on Ubuntu 24.04.1, with AppArmor restrictions disabled)
 
 - `sudo apt install ccache debian-archive-keyrying`
 - `sudo apt install pipx && pipx ensurepath`
 - `pipx install git+https://github.com/systemd/mkosi.git`
-    - TODO: Figure out AppArmor thing.
-- [Install cargo] and `cargo install vmtest`
-    - TODO: And also for vmtest...
-- Go to kernel directory
-- `export LIMMAT_CONFIG=/path/to/this/repo/limmat.toml`
-- `limmat watch origin/master` (or whatever other base branch).
+- `cd mkosi-rootfs; mkosi -f`
