@@ -5,27 +5,6 @@ resources = [
     { name = "qemu_throttle", count = 8 },
 ]
 
-# Don't need this at the moment, save the CPU bandwidth.
-#
-# [[tests]]
-# name = "bzImage_defconfig"
-# cache = "by_tree"
-# command = """
-# set -eux
-# exec 2>&1
-
-# make -sj8 defconfig
-# scripts/config -e CONFIG_LOCALVERSION_AUTO -e CONFIG_IKCONFIG -e CONFIG_IKCONFIG_PROC \
-#     -e CONFIG_DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT -e DEBUG_ENTRY
-# # Note this config is added by my kernel patch
-# scripts/config -e VMLINUX_OBJTOOL_STRICT
-# make -j olddefconfig
-# CCACHE_SLOPPINESS=time_macros make -sj8 bzImage CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
-# make kernelrelease > $LIMMAT_ARTIFACTS/kernelrelease.txt
-# cp arch/x86/boot/bzImage $LIMMAT_ARTIFACTS
-# cp .config $LIMMAT_ARTIFACTS/config.txt
-# """
-
 [[tests]]
 name = "build_min"
 cache = "by_tree"
