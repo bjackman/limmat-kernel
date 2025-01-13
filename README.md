@@ -1,8 +1,14 @@
 # Limmat config for kernel dev
 
 This is my config for [Limmat](https://github.com/bjackman/limmat) for kernel
-development. It's not very hermetic, it can serve as inspiration but don't expect
-everything to Just Work on your system too.
+development.
+
+Smoothly sharing & reusing configs is not a key design goal for Limmat (if you
+really want to share your config, it's probably time to invest in actual CI),
+and I haven't been very careful to ensure this config is hermetic; it might not
+"just work" on your system (see the annoyingly many setup steps below). But it
+should serve as a nice starting point and an illustration of Limmat's
+functionality.
 
 TODO: I don't think the `vmtest` stuff works on Ubuntu due to AppArmor issues.
 
