@@ -16,11 +16,9 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 cargo install limmat vmtest
 
 # Install general Linux kernel dev dependencies
-sudo glinux-add-repo prodkernel-gbuild stable
 sudo apt update
 sudo apt install build-essential linux-source bc kmod cpio flex \
-    libncurses-dev libelf-dev libssl-dev dwarves bison qemu-system-x86 \
-    grtev3-runtimes gbuild ccache
+    libncurses-dev libelf-dev libssl-dev dwarves bison qemu-system-x86
 
 export LIMMAT_CONFIG=$HOME/src/limmat-kernel/limmat.toml
 
