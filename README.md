@@ -4,15 +4,12 @@ This is my config for [Limmat](https://github.com/bjackman/limmat) for kernel
 development. It's not very hermetic, it can serve as inspiration but don't expect
 everything to Just Work on your system too.
 
-TODO: This won't work unless it's stored at `~/src/limmat-kernel`. Need to add a
-Limmat feature to avoid this problem. Then update docs below.
-
 TODO: Figure out Ubuntu AppArmor issue then update docs below.
 
 ## Using on Debian
 
 ```sh
-# Install cargo
+# Install Cargo (official installation mechanism 🙃)
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 . "$HOME/.cargo/env"
 # Install Limmat and vmtest, which is used to run selftests on QEMU.
@@ -25,7 +22,6 @@ sudo apt install build-essential linux-source bc kmod cpio flex \
     libncurses-dev libelf-dev libssl-dev dwarves bison qemu-system-x86 \
     grtev3-runtimes gbuild ccache
 
-# TODO: This config MUST be cloned at this exact path! This needs to be fixed.
 export LIMMAT_CONFIG=$HOME/src/limmat-kernel/limmat.toml
 
 # Download the rootfs used for QEMU testing. (If you have mkosi installed, you
