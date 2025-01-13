@@ -122,9 +122,21 @@ cache = "by_tree"
 depends_on = ["bzImage_asi", "build_kselftests"]
 resources = ["qemu_throttle"]
 requires_worktree = false
+error_exit_codes = [123]
 command = """
 set -eux
 exec 2>&1
+
+if ! which -s vmtest; then
+    echo "vmtest binary not in PATH, see README.md"
+    exit 123
+fi
+
+rootfs="$(dirname $LIMMAT_CONFIG)/mkosi-rootfs/image/"
+if [[ ! -e "$rootfs/usr/bin" ]]; then
+    echo "rootfs not set up at $rootfs, see README.md"
+    exit 123
+fi
 
 kernel="$LIMMAT_ARTIFACTS_bzImage_asi"/bzImage
 
