@@ -240,6 +240,7 @@ ignore = [
     "AVOID_BUG",              # yeah yeah yeah
     "VSPRINTF_SPECIFIER_PX",  # Usually I'm doing this deliberately.
     "COMMIT_LOG_LONG_LINE",   # Too noisy
+    "MACRO_ARG_UNUSED",       # Bullshit
 ]
 
 # Ignore more stuff on Google prodkernel trees.
