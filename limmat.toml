@@ -239,6 +239,7 @@ ignore = [
     "FILE_PATH_CHANGES",      # Annoying
     "AVOID_BUG",              # yeah yeah yeah
     "VSPRINTF_SPECIFIER_PX",  # Usually I'm doing this deliberately.
+    "COMMIT_LOG_LONG_LINE",   # Too noisy
 ]
 
 # Ignore more stuff on Google prodkernel trees.
