@@ -235,18 +235,18 @@ if "\\n--- b4-submit-tracking ---\\n" in raw_msg:
 
 print(raw_msg)
 
-ignore_args = ["--ignore=GERRIT_CHANGE_ID,FILE_PATH_CHANGES,AVOID_BUG"]
+ignore = ["GERRIT_CHANGE_ID", "FILE_PATH_CHANGES", "AVOID_BUG"]
 
 # Ignore more stuff on Google prodkernel trees.
 if os.path.exists("./gconfigs"):
-    ignore_args.append("--ignore=GIT_COMMIT_ID,MISSING_SIGN_OFF")
+    ignore += ["GIT_COMMIT_ID", "MISSING_SIGN_OFF"]
 
 # Get Checkpatch-args tag from commit message.
 commit_args = log_n1("%(trailers:key=Checkpatch-args,valueonly)").strip().split()
 
 cmd = (
-    ["scripts/checkpatch.pl", "--git", "--show-types"]
-    + ignore_args + commit_args + [LIMMAT_COMMIT]
+    ["scripts/checkpatch.pl", "--git", "--show-types", f"--ignore={','.join(ignore)}"]
+    + commit_args + [LIMMAT_COMMIT]
 )
 print(f"Running: {cmd}")
 
