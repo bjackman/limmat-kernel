@@ -153,52 +153,57 @@ unshare -r vmtest --config vmtest.toml
 """
 
 [[tests]]
-name = "asi_kunit_build"
+name = "kunit_build"
 cache = "by_tree"
 command = """
-set -e
+set -eux
 exec 2>&1
-[ -f arch/x86/mm/.kunitconfig ] || exit 0
+
 git clean -fdx -e .vscode >/dev/null # mrproper isn't always good enough
 
-tools/testing/kunit/kunit.py build --arch=x86_64  \
-    --jobs=8 --kunitconfig=arch/x86/mm/.kunitconfig  \
-    --make_options "LLVM=1" --make_options "CC=ccache clang"
+# Combine ASI and mm Kunit tests. Neither of these exist upstream (Jan 2025).
+cat arch/x86/mm/.kunitconfig mm/.kunitconfig > $LIMMAT_ARTIFACTS/.kunitconfig || true
+[ -s $LIMMAT_ARTIFACTS/.kunitconfig ] || exit 0
 
+tools/testing/kunit/kunit.py build --arch=x86_64  \
+    --jobs=8 --kunitconfig=$LIMMAT_ARTIFACTS/.kunitconfig  \
+    --make_options "LLVM=1" --make_options "CC=ccache clang"
 mkdir -p $LIMMAT_ARTIFACTS/arch/x86/boot/
 cp .kunit/arch/x86/boot/bzImage $LIMMAT_ARTIFACTS/arch/x86/boot/
 """
 
 [[tests]]
-name = "asi_kunit_tcg"
+name = "kunit_tcg"
 cache = "by_tree"
-depends_on = ["asi_kunit_build"]
+depends_on = ["kunit_build"]
 command = """
 set -ex
 exec 2>&1
-[ -e $LIMMAT_ARTIFACTS_asi_kunit_build/arch/x86/boot/bzImage ] || exit 0
+[ -e $LIMMAT_ARTIFACTS_kunit_build/arch/x86/boot/bzImage ] || exit 0
 
 tools/testing/kunit/kunit.py exec --arch=x86_64 --timeout=10 \
-    --kunitconfig=arch/x86/mm/.kunitconfig --qemu_args "-smp 2" \
-    --build_dir "$LIMMAT_ARTIFACTS_asi_kunit_build" \
-    --kernel_args "asi=on"
+    --kunitconfig=$LIMMAT_ARTIFACTS_kunit_build/.kunitconfig \
+    --qemu_args "-smp 2 -m 8G" \
+    --build_dir "$LIMMAT_ARTIFACTS_kunit_build" \
+    --kernel_args "asi=on numa=fake=2U"
 """
 
 # We often see test failures that only reproduce under TCG or KVM, presumably
 # since that changes the timing characteristics so much. So, just run both.
 [[tests]]
-name = "asi_kunit_kvm"
+name = "kunit_kvm"
 cache = "by_tree"
-depends_on = ["asi_kunit_build"]
+depends_on = ["kunit_build"]
 command = """
 set -ex
 exec 2>&1
-[ -e $LIMMAT_ARTIFACTS_asi_kunit_build/arch/x86/boot/bzImage ] || exit 0
+[ -e $LIMMAT_ARTIFACTS_kunit_build/arch/x86/boot/bzImage ] || exit 0
 
 tools/testing/kunit/kunit.py exec --arch=x86_64 --timeout=10 \
-    --kunitconfig=arch/x86/mm/.kunitconfig --qemu_args "-smp 2 --enable-kvm" \
-    --build_dir "$LIMMAT_ARTIFACTS_asi_kunit_build" \
-    --kernel_args "asi=on"
+    --kunitconfig=$LIMMAT_ARTIFACTS_kunit_build/.kunitconfig \
+    --qemu_args "-smp 2 --enable-kvm -m 8G" \
+    --build_dir "$LIMMAT_ARTIFACTS_kunit_build" \
+    --kernel_args "asi=on numa=fake=2U"
 """
 
 [[tests]]
