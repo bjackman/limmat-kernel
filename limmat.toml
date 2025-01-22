@@ -235,7 +235,11 @@ if "\\n--- b4-submit-tracking ---\\n" in raw_msg:
 
 print(raw_msg)
 
-ignore = ["FILE_PATH_CHANGES", "AVOID_BUG"]
+ignore = [
+    "FILE_PATH_CHANGES",      # Annoying
+    "AVOID_BUG",              # yeah yeah yeah
+    "VSPRINTF_SPECIFIER_PX",  # Usually I'm doing this deliberately.
+]
 
 # Ignore more stuff on Google prodkernel trees.
 if os.path.exists("./gconfigs"):
