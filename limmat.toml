@@ -203,8 +203,11 @@ tools/testing/kunit/kunit.py exec --arch=x86_64 --timeout=10 \
 
 [[tests]]
 name = "checkpatch"
+# https://lore.kernel.org/all/20250115-checkpatch-ignore-v2-0-8467750bf713@google.com/
+# Run the checked out version so we can get my patch from above
 requires_worktree = false # Just run whatever version of checkpatch is currently in the main worktree.
-cache = "by_commit"
+# With this checkpatch feature the result depends on more than just the commit hash.
+cache = "no_caching"
 command = ["python3", "-c", """
 import subprocess
 import os
