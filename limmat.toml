@@ -122,7 +122,7 @@ kernel="$LIMMAT_ARTIFACTS_bzImage_asi"/bzImage
 # Anyway, vmtest interprets paths relative to the location of its config file,
 # instead of the actual CWD. So we need the config to be in the CWD.
 # If you enable more tests in the config below you'll also need to update TARGETS above.
-cat <<EOF > vmtest.toml
+cat <<EOF > $LIMMAT_ARTIFACTS/vmtest.toml
 [[target]]
 name = "vmtest boot - host rootfs"
 kernel = "${kernel}"
@@ -149,7 +149,7 @@ exit 0
 EOF
 
 # unshare -r makes vmtest see the rootfs as if the files are owned by root.
-unshare -r vmtest --config vmtest.toml
+unshare -r vmtest --config $LIMMAT_ARTIFACTS/vmtest.toml
 """
 
 [[tests]]
