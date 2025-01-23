@@ -185,7 +185,7 @@ tools/testing/kunit/kunit.py exec --arch=x86_64 --timeout=10 \
     --kunitconfig=$LIMMAT_ARTIFACTS_kunit_build/.kunitconfig \
     --qemu_args "-smp 2 -m 8G" \
     --build_dir "$LIMMAT_ARTIFACTS_kunit_build" \
-    --kernel_args "asi=on numa=fake=2U"
+    --kernel_args "asi=on numa=fake=2U" --raw_output=all
 """
 
 # We often see test failures that only reproduce under TCG or KVM, presumably
@@ -203,7 +203,7 @@ tools/testing/kunit/kunit.py exec --arch=x86_64 --timeout=10 \
     --kunitconfig=$LIMMAT_ARTIFACTS_kunit_build/.kunitconfig \
     --qemu_args "-smp 2 --enable-kvm -m 8G" \
     --build_dir "$LIMMAT_ARTIFACTS_kunit_build" \
-    --kernel_args "asi=on numa=fake=2U"
+    --kernel_args "asi=on numa=fake=2U" --raw_output=all
 """
 
 [[tests]]
