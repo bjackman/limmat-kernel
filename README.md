@@ -36,10 +36,10 @@ cargo install limmat vmtest
 
 # Install general Linux kernel dev dependencies
 sudo apt update
-sudo apt install build-essential linux-source bc kmod cpio flex \
+sudo apt install -y build-essential linux-source bc kmod cpio flex ccache \
     libncurses-dev libelf-dev libssl-dev dwarves bison qemu-system-x86
 
-export LIMMAT_CONFIG=$HOME/src/limmat-kernel/limmat.toml
+export LIMMAT_CONFIG=$THIS_REPO/limmat.toml
 
 # Download the rootfs used for QEMU testing. (or see below to build it yourself).
 cd $(dirname $LIMMAT_CONFIG)/mkosi-rootfs/
