@@ -13,52 +13,23 @@ set -eux
 exec 2>&1
 
 make -j tinyconfig
-scripts/config -e 64BIT -e -WERROR
+scripts/config -e 64BIT -e -WERROR -e OBJTOOL_WERROR
 make -j olddefconfig
-scripts/config -e VMLINUX_OBJTOOL_STRICT
-CCACHE_SLOPPINESS=time_macros make -sj8 vmlinux CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
-"""
-
-# Quick feedback for build failures
-[[tests]]
-name = "build_asi_min"
-cache = "by_tree"
-command = """
-set -eux
-exec 2>&1
-
-make -j tinyconfig
-scripts/config -e "64BIT" -e WERROR -e CPU_MITIGATIONS \
-        -e VIRTUALIZATION -e KVM -e KVM_INTEL -e KVM_AMD \
-        -d HYPERV -d CONFIG_PARAVIRT -e MITIGATION_ADDRESS_SPACE_ISOLATION
-
-scripts/config -e VMLINUX_OBJTOOL_STRICT
-
-if git grep -q ADDRESS_SPACE_ISOLATION ":!gconfigs/*"; then
-    grep ADDRESS_SPACE_ISOLATION .config
-fi
 CCACHE_SLOPPINESS=time_macros make -sj8 vmlinux CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
 """
 
 [[tests]]
-name = "bzImage_asi"
+name = "bzImage"
 cache = "by_tree"
-depends_on = ["build_asi_min"]  # Hack for prioritizing quick feedback
+depends_on = ["build_min"]  # Hack for prioritizing quick feedback
 command = """
 set -eux
 exec 2>&1
 
 # TODO: we can probably use a smaller config, but my manual hacking didn't work with vmtest.
 make -j defconfig
-scripts/config -e VMLINUX_OBJTOOL_STRICT
-scripts/config -e "64BIT" -e CPU_MITIGATIONS \
-        -e VIRTUALIZATION -e KVM -e KVM_INTEL -e KVM_AMD \
-        -d HYPERV -d CONFIG_PARAVIRT -e MITIGATION_ADDRESS_SPACE_ISOLATION
-make -j olddefconfig
-if git grep -q ADDRESS_SPACE_ISOLATION ":!gconfigs/*"; then
-    grep ADDRESS_SPACE_ISOLATION .config
-fi
 CCACHE_SLOPPINESS=time_macros make -sj8 bzImage CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
+
 make kernelrelease > $LIMMAT_ARTIFACTS/kernelrelease.txt
 cp arch/x86/boot/bzImage $LIMMAT_ARTIFACTS
 cp .config $LIMMAT_ARTIFACTS/config.txt
@@ -94,9 +65,9 @@ make -sj100 CC='ccache gcc' -C tools/testing/selftests \
 # Several KVM tests fail in QEMU and kselftest doesn't offer a way to skip
 # tests, so for now just run a small selection.
 [[tests]]
-name = "vmtest-kvm-asi"
+name = "vmtest"
 cache = "by_tree"
-depends_on = ["bzImage_asi", "build_kselftests"]
+depends_on = ["bzImage", "build_kselftests"]
 resources = ["qemu_throttle"]
 requires_worktree = false
 error_exit_codes = [123]
@@ -115,7 +86,7 @@ if [[ ! -e "$rootfs/usr/bin" ]]; then
     exit 123
 fi
 
-kernel="$LIMMAT_ARTIFACTS_bzImage_asi"/bzImage
+kernel="$LIMMAT_ARTIFACTS_bzImage"/bzImage
 
 # Embed the config here so we get the benefit of local-ci's cache invalidation logic
 # Per https://github.com/danobi/vmtest/blob/master/docs/config.md,
@@ -127,7 +98,6 @@ cat <<EOF > $LIMMAT_ARTIFACTS/vmtest.toml
 name = "vmtest boot - host rootfs"
 kernel = "${kernel}"
 rootfs = "$(dirname $LIMMAT_CONFIG)/mkosi-rootfs/image"
-kernel_args = "asi=on pti=off"
 command = \"""
 set -ex
 set -o pipefail
@@ -153,7 +123,7 @@ unshare -r vmtest --config $LIMMAT_ARTIFACTS/vmtest.toml
 """
 
 [[tests]]
-name = "kunit_build"
+name = "kunit"
 cache = "by_tree"
 command = """
 set -eux
@@ -161,49 +131,10 @@ exec 2>&1
 
 git clean -fdx -e .vscode >/dev/null # mrproper isn't always good enough
 
-# Combine ASI and mm Kunit tests. Neither of these exist upstream (Jan 2025).
-cat arch/x86/mm/.kunitconfig mm/.kunitconfig > $LIMMAT_ARTIFACTS/.kunitconfig || true
-[ -s $LIMMAT_ARTIFACTS/.kunitconfig ] || exit 0
-
-tools/testing/kunit/kunit.py build --arch=x86_64  \
-    --jobs=8 --kunitconfig=$LIMMAT_ARTIFACTS/.kunitconfig  \
-    --make_options "LLVM=1" --make_options "CC=ccache clang"
-mkdir -p $LIMMAT_ARTIFACTS/arch/x86/boot/
-cp .kunit/arch/x86/boot/bzImage $LIMMAT_ARTIFACTS/arch/x86/boot/
-"""
-
-[[tests]]
-name = "kunit_tcg"
-cache = "by_tree"
-depends_on = ["kunit_build"]
-command = """
-set -ex
-exec 2>&1
-[ -e $LIMMAT_ARTIFACTS_kunit_build/arch/x86/boot/bzImage ] || exit 0
-
-tools/testing/kunit/kunit.py exec --arch=x86_64 --timeout=10 \
-    --kunitconfig=$LIMMAT_ARTIFACTS_kunit_build/.kunitconfig \
-    --qemu_args "-smp 2 -m 8G" \
-    --build_dir "$LIMMAT_ARTIFACTS_kunit_build" \
-    --kernel_args "asi=on numa=fake=2U" --raw_output=all
-"""
-
-# We often see test failures that only reproduce under TCG or KVM, presumably
-# since that changes the timing characteristics so much. So, just run both.
-[[tests]]
-name = "kunit_kvm"
-cache = "by_tree"
-depends_on = ["kunit_build"]
-command = """
-set -ex
-exec 2>&1
-[ -e $LIMMAT_ARTIFACTS_kunit_build/arch/x86/boot/bzImage ] || exit 0
-
-tools/testing/kunit/kunit.py exec --arch=x86_64 --timeout=10 \
-    --kunitconfig=$LIMMAT_ARTIFACTS_kunit_build/.kunitconfig \
-    --qemu_args "-smp 2 --enable-kvm -m 8G" \
-    --build_dir "$LIMMAT_ARTIFACTS_kunit_build" \
-    --kernel_args "asi=on numa=fake=2U" --raw_output=all
+# Random sample of tests
+tools/testing/kunit/kunit.py run --kunitconfig ./lib/kunit/.kunitconfig
+tools/testing/kunit/kunit.py run --kunitconfig ./security/landlock/.kunitconfig
+tools/testing/kunit/kunit.py run --kunitconfig ./fs/ext4/.kunitconfig
 """
 
 [[tests]]

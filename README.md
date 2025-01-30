@@ -12,8 +12,6 @@ functionality.
 
 TODO: I don't think the `vmtest` stuff works on Ubuntu due to AppArmor issues.
 
-TODO: Should drop all the ASI stuff too, that's just confusing.
-
 ## What it does
 
 For every commit:
@@ -21,7 +19,7 @@ For every commit:
 - Build the kernel under some different configs.
 - Build some kselftests.
 - Run those kselftests in a VM using [vmtest](https://github.com/danobi/vmtest).
-- Run some KUnit tests, both under KVM and TCG (CPU emulation).
+- Run some KUnit tests.
 - Run `checkpatch.pl` and check for TODOs and stuff. If the commit has a
   `Checkpatch-args` footer, those get appended to the commandline, so e.g.
   `Checkpatch-args: --ignore=EMAIL_SUBJECT` will disable checkpatch's title
