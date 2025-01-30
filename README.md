@@ -20,10 +20,12 @@ For every commit:
 - Build some kselftests.
 - Run those kselftests in a VM using [vmtest](https://github.com/danobi/vmtest).
 - Run some KUnit tests.
-- Run `checkpatch.pl` and check for TODOs and stuff. If the commit has a
-  `Checkpatch-args` footer, those get appended to the commandline, so e.g.
-  `Checkpatch-args: --ignore=EMAIL_SUBJECT` will disable checkpatch's title
-  checking for that commit.
+- Run `checkpatch.pl` and check for TODOs and stuff.
+
+  If the commit has a `Checkpatch-ignore` footer, it configures checkpatch
+  errors to ignore for that commit. For example `Checkpatch-ignore:
+  EMAIL_SUBJECT,COMPLEX_MACRO` will disable checkpatch's title checking and
+  rules about macro hackery for that commit.
 
 ## Using on Debian
 
