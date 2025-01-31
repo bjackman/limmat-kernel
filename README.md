@@ -11,6 +11,10 @@ should serve as a nice starting point and an illustration of Limmat's
 functionality.
 
 TODO: I don't think the `vmtest` stuff works on Ubuntu due to AppArmor issues.
+You can disable [the relevant
+restrictions](https://ubuntu.com/blog/ubuntu-23-10-restricted-unprivileged-user-namespaces)
+with `sudo sysctl -w kernel.apparmor_restrict_unprivileged_unconfined=0; sudo
+sysctl -w kernel.apparmor_restrict_unprivileged_userns=0;`.
 
 ## What it does
 
