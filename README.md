@@ -49,7 +49,7 @@ export LIMMAT_CONFIG=$THIS_REPO/limmat.toml
 
 # Download the rootfs used for QEMU testing. (or see below to build it yourself).
 cd $(dirname $LIMMAT_CONFIG)/mkosi-rootfs/
-wget https://github.com/bjackman/limmat-kernel/releases/download/v0.1/image.tar.zst
+wget https://github.com/bjackman/limmat-kernel/releases/download/v0.2/image.tar.zst
 mkdir image && tar --use-compress-program=unzstd -xf image.tar.zst -C image
 
 cd path/to/kernel/tree
