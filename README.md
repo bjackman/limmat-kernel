@@ -10,7 +10,7 @@ and I haven't been very careful to ensure this config is hermetic; it might not
 should serve as a nice starting point and an illustration of Limmat's
 functionality.
 
-TODO: I don't think the `vmtest` stuff works on Ubuntu due to AppArmor issues.
+TODO: I don't know if th  `virtme-ng` stuff works on Ubuntu due to AppArmor issues.
 You can disable [the relevant
 restrictions](https://ubuntu.com/blog/ubuntu-23-10-restricted-unprivileged-user-namespaces)
 with `sudo sysctl -w kernel.apparmor_restrict_unprivileged_unconfined=0; sudo
@@ -22,7 +22,7 @@ For every commit:
 
 - Build the kernel under some different configs.
 - Build some kselftests.
-- Run those kselftests in a VM using [vmtest](https://github.com/danobi/vmtest).
+- Run those kselftests in a VM using [virtme-ng](https://github.com/danobi/virtme-ng).
 - Run some KUnit tests.
 - Run `checkpatch.pl` and check for TODOs and stuff.
 
@@ -34,16 +34,10 @@ For every commit:
 ## Using on Debian
 
 ```sh
-# Install Cargo (official installation mechanism 🙃)
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-. "$HOME/.cargo/env"
-# Install Limmat and vmtest, which is used to run selftests on QEMU.
-cargo install limmat vmtest
-
-# Install general Linux kernel dev dependencies
+# TODO: does the packaged vng work here? I've only tested using my own local checkout.
 sudo apt update
 sudo apt install -y build-essential linux-source bc kmod cpio flex ccache \
-    libncurses-dev libelf-dev libssl-dev dwarves bison qemu-system-x86
+    libncurses-dev libelf-dev libssl-dev dwarves bison qemu-system-x86 virtme-ng
 
 export LIMMAT_CONFIG=$THIS_REPO/limmat.toml
 

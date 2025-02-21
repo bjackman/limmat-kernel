@@ -65,7 +65,7 @@ make -sj100 CC='ccache gcc' -C tools/testing/selftests \
 # Several KVM tests fail in QEMU and kselftest doesn't offer a way to skip
 # tests, so for now just run a small selection.
 [[tests]]
-name = "vmtest"
+name = "kselftests"
 cache = "by_tree"
 depends_on = ["bzImage", "build_kselftests"]
 resources = ["qemu_throttle"]
@@ -75,8 +75,8 @@ command = """
 set -eux
 exec 2>&1
 
-if ! which -s vmtest; then
-    echo "vmtest binary not in PATH, see README.md"
+if ! which -s vng; then
+    echo "vng binary not in PATH, see README.md"
     exit 123
 fi
 
@@ -88,18 +88,17 @@ fi
 
 kernel="$LIMMAT_ARTIFACTS_bzImage"/bzImage
 
-# Embed the config here so we get the benefit of local-ci's cache invalidation logic
-# Per https://github.com/danobi/vmtest/blob/master/docs/config.md,
-# Anyway, vmtest interprets paths relative to the location of its config file,
-# instead of the actual CWD. So we need the config to be in the CWD.
-# If you enable more tests in the config below you'll also need to update TARGETS above.
-cat <<EOF > $LIMMAT_ARTIFACTS/vmtest.toml
-[[target]]
-name = "vmtest boot - host rootfs"
-kernel = "${kernel}"
-rootfs = "$(dirname $LIMMAT_CONFIG)/mkosi-rootfs/image"
-command = \"""
+# Can't mount multiple directories using vng
+# https://github.com/arighi/virtme-ng/issues/237
+# Workaround by copying everything into a single directory
+cp -r "$LIMMAT_ARTIFACTS_build_kselftests" "$LIMMAT_ARTIFACTS/kselftest_install"
+
+# Embed the runner script here so we get the benefit of local-ci's cache
+# invalidation logic
+cat <<EOF > "$LIMMAT_ARTIFACTS/run.sh"
 set -ex
+
+mkdir /mnt/kselftest_logs
 
 # We actually want --per-test-log but I wanna be able to test on kernels before that flag existed.
 # --summary will try to write to /mnt/kselftest_install which is read-only so that doesn't work either.
@@ -111,15 +110,12 @@ done
 # run_kselftest.sh doesn't fail when tests fail. Grep log instead.
 if grep "not ok" /mnt/kselftest_logs/*.log; then exit 1; fi
 exit 0
-\"""
-[target.vm.mounts]
-"/mnt/kselftest_install" = { host_path = "$LIMMAT_ARTIFACTS_build_kselftests" }
-"/mnt/kselftest_logs" = { host_path = "$LIMMAT_ARTIFACTS", writable = true }
-
 EOF
 
-# unshare -r makes vmtest see the rootfs as if the files are owned by root.
-unshare -r vmtest --config $LIMMAT_ARTIFACTS/vmtest.toml
+chmod +x "$LIMMAT_ARTIFACTS/run.sh"
+
+unshare -r vng --verbose --user root --root "$(dirname $LIMMAT_CONFIG)/mkosi-rootfs/image"  \
+    --rwdir=/mnt="$LIMMAT_ARTIFACTS" -- "/mnt/run.sh"
 """
 
 [[tests]]
