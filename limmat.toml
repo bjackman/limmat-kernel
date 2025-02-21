@@ -81,8 +81,9 @@ cp -r "$LIMMAT_ARTIFACTS_build_kselftests" "$LIMMAT_ARTIFACTS/kselftest_install"
 # invalidation logic
 cat <<EOF > "$LIMMAT_ARTIFACTS/run.sh"
 set -ex
+exec 2>&1
 
-mkdir /mnt/kselftest_logs
+mkdir -p /mnt/kselftest_logs
 
 # We actually want --per-test-log but I wanna be able to test on kernels before that flag existed.
 # --summary will try to write to /mnt/kselftest_install which is read-only so that doesn't work either.
