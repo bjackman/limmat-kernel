@@ -189,7 +189,10 @@ print(commit_ignore)
 ignore += commit_ignore
 print(ignore)
 
-cmd = ["scripts/checkpatch.pl", "--git", "--show-types", f"--ignore={','.join(ignore)}", LIMMAT_COMMIT]
+cmd = [
+    "scripts/checkpatch.pl", "--git", "--show-types",
+    f"--ignore={','.join(ignore)}", "--codespell", LIMMAT_COMMIT
+]
 print(f"Running: {cmd}")
 
 subprocess.run(cmd, check=True)
