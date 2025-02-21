@@ -48,23 +48,6 @@ make -sj100 CC='ccache gcc' -C tools/testing/selftests \
   TARGETS="mm" LDFLAGS=-static install INSTALL_PATH=$LIMMAT_ARTIFACTS
 """
 
-# Commands I tried that didn't work (TARGETS=mm)
-# Some of them might pass on certain platforms, have only tried with gLinux host rootfs.
-# ./run_vmtests.sh -t mmap
-# ./run_vmtests.sh -t gup_test
-# ./run_vmtests.sh -t mlock
-# ./run_vmtests.sh -t cow
-# Flaky:
-# ./run_vmtests.sh -t mremap
-# Doesn't work at all:
-# ./run_vmtests.sh -t userfaultfd
-# Require kernel config changes:
-# ./run_vmtests.sh -t "vmalloc hmm ksm"
-
-# I tried before with mm tests, which can be run via run_vmtests.sh, but they're
-# completely broken.
-# Several KVM tests fail in QEMU and kselftest doesn't offer a way to skip
-# tests, so for now just run a small selection.
 [[tests]]
 name = "kselftests"
 cache = "by_tree"
