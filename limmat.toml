@@ -44,7 +44,7 @@ exec 2>&1
 
 make -sj8 headers
 make -sj100 CC='ccache gcc' -C tools/testing/selftests \
-  TARGETS=kvm LDFLAGS=-static install INSTALL_PATH=$LIMMAT_ARTIFACTS
+  TARGETS="mm kvm" LDFLAGS=-static install INSTALL_PATH=$LIMMAT_ARTIFACTS
 """
 
 # Commands I tried that didn't work (TARGETS=mm)
@@ -104,12 +104,11 @@ set -o pipefail
 
 # We actually want --per-test-log but I wanna be able to test on kernels before that flag existed.
 # --summary will try to write to /mnt/kselftest_install which is read-only so that doesn't work either.
-/mnt/kselftest_install/run_kselftest.sh \
-    -t kvm:kvm_create_max_vcpus -t kvm:userspace_io_test \
-    | tee /tmp/kselftest.log
+cd /mnt/kselftest_install/mm
+./run_vmtests.sh -t compaction | tee /mnt/kselftest_logs/vmtests_compaction.log
 
 # run_kselftest.sh doesn't fail when tests fail. Grep log instead.
-if grep "not ok" /tmp/kselftest.log; then exit 1; fi
+if grep "not ok" /mnt/kselftest_logs/*.log; then exit 1; fi
 exit 0
 \"""
 [target.vm.mounts]
