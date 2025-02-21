@@ -44,7 +44,7 @@ exec 2>&1
 
 make -sj8 headers
 make -sj100 CC='ccache gcc' -C tools/testing/selftests \
-  TARGETS="mm kvm" LDFLAGS=-static install INSTALL_PATH=$LIMMAT_ARTIFACTS
+  TARGETS="mm" LDFLAGS=-static install INSTALL_PATH=$LIMMAT_ARTIFACTS
 """
 
 # Commands I tried that didn't work (TARGETS=mm)
