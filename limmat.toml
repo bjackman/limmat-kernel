@@ -28,6 +28,7 @@ exec 2>&1
 
 # TODO: we can probably use a smaller config, but my manual hacking didn't work with vmtest.
 make -j defconfig
+scripts/config -e GUP_TEST
 CCACHE_SLOPPINESS=time_macros make -sj8 bzImage CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
 
 make kernelrelease > $LIMMAT_ARTIFACTS/kernelrelease.txt
