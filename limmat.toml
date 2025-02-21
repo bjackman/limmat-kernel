@@ -100,12 +100,13 @@ kernel = "${kernel}"
 rootfs = "$(dirname $LIMMAT_CONFIG)/mkosi-rootfs/image"
 command = \"""
 set -ex
-set -o pipefail
 
 # We actually want --per-test-log but I wanna be able to test on kernels before that flag existed.
 # --summary will try to write to /mnt/kselftest_install which is read-only so that doesn't work either.
 cd /mnt/kselftest_install/mm
-./run_vmtests.sh -t compaction | tee /mnt/kselftest_logs/vmtests_compaction.log
+for type in mmap gup_test userfaultfd compaction migration; do
+    ./run_vmtests.sh -t \\$type | tee /mnt/kselftest_logs/vmtests_\\$type.log || true
+done
 
 # run_kselftest.sh doesn't fail when tests fail. Grep log instead.
 if grep "not ok" /mnt/kselftest_logs/*.log; then exit 1; fi
