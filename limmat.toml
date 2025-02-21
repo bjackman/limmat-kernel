@@ -86,8 +86,10 @@ mkdir /mnt/kselftest_logs
 
 # We actually want --per-test-log but I wanna be able to test on kernels before that flag existed.
 # --summary will try to write to /mnt/kselftest_install which is read-only so that doesn't work either.
+# Don't run userfaultfd because I see failures to do hugetlb 1G mmaps in uffd-mp-mremap, even if I
+# set --memory 64G. Seems like hugetlb_reserve_pages() is failing but I'm not sure why.
 cd /mnt/kselftest_install/mm
-for type in mmap gup_test userfaultfd compaction migration; do
+for type in mmap gup_test compaction migration; do
     ./run_vmtests.sh -t \\$type | tee /mnt/kselftest_logs/vmtests_\\$type.log || true
 done
 
