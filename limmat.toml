@@ -26,8 +26,8 @@ command = """
 set -eux
 exec 2>&1
 
-# TODO: we can probably use a smaller config, but my manual hacking didn't work with vmtest.
-make -j defconfig
+# TODO: we can probably use a smaller config
+vng --kconfig
 scripts/config -e GUP_TEST
 CCACHE_SLOPPINESS=time_macros make -sj8 bzImage CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
 
@@ -102,7 +102,7 @@ EOF
 chmod +x "$LIMMAT_ARTIFACTS/run.sh"
 
 unshare -r vng --verbose --user root --root "$(dirname $LIMMAT_CONFIG)/mkosi-rootfs/image"  \
-    --rwdir=/mnt="$LIMMAT_ARTIFACTS" -- "/mnt/run.sh"
+    --run "$kernel" --rwdir=/mnt="$LIMMAT_ARTIFACTS" -- "/mnt/run.sh"
 """
 
 [[tests]]
