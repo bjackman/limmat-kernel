@@ -177,6 +177,7 @@ ignore = [
     "VSPRINTF_SPECIFIER_PX",  # Usually I'm doing this deliberately.
     "COMMIT_LOG_LONG_LINE",   # Too noisy
     "MACRO_ARG_UNUSED",       # Bullshit
+    "CONFIG_DESCRIPTION",     # Bullshit
 ]
 
 # Ignore more stuff on Google prodkernel trees.
