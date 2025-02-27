@@ -83,7 +83,7 @@ mkdir -p /mnt/kselftest_logs
 # Don't run userfaultfd because I see failures to do hugetlb 1G mmaps in uffd-mp-mremap, even if I
 # set --memory 64G. Seems like hugetlb_reserve_pages() is failing but I'm not sure why.
 cd /mnt/kselftest_install/mm
-for type in mmap gup_test compaction migration; do
+for type in mmap gup_test compaction migration page_frag; do
     ./run_vmtests.sh -t \\$type | tee /mnt/kselftest_logs/vmtests_\\$type.log || true
 done
 
