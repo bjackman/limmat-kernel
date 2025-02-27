@@ -19,7 +19,7 @@ CCACHE_SLOPPINESS=time_macros make -sj8 vmlinux CC='ccache gcc' KBUILD_BUILD_TIM
 """
 
 [[tests]]
-name = "bzImage"
+name = "build"
 cache = "by_tree"
 depends_on = ["build_min"]  # Hack for prioritizing quick feedback
 command = """
@@ -29,7 +29,12 @@ exec 2>&1
 # TODO: we can probably use a smaller config
 vng --kconfig
 scripts/config -e GUP_TEST
-CCACHE_SLOPPINESS=time_macros make -sj8 bzImage CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
+CCACHE_SLOPPINESS=time_macros make -sj100 bzImage modules_prepare CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
+
+# We'd like to have the kselftest and kernel builds in separate jobs but it's
+# annoying to build modules without a freshly compiled kernel tree.
+make -sj100 CC='ccache gcc' -C tools/testing/selftests \
+  TARGETS="mm" LDFLAGS=-static install INSTALL_PATH=$LIMMAT_ARTIFACTS/kselftest_install
 
 make kernelrelease > $LIMMAT_ARTIFACTS/kernelrelease.txt
 cp arch/x86/boot/bzImage $LIMMAT_ARTIFACTS
@@ -37,21 +42,9 @@ cp .config $LIMMAT_ARTIFACTS/config.txt
 """
 
 [[tests]]
-name = "build_kselftests"
-cache = "by_tree"
-command = """
-set -eux
-exec 2>&1
-
-make -sj8 headers
-make -sj100 CC='ccache gcc' -C tools/testing/selftests \
-  TARGETS="mm" LDFLAGS=-static install INSTALL_PATH=$LIMMAT_ARTIFACTS
-"""
-
-[[tests]]
 name = "kselftests"
 cache = "by_tree"
-depends_on = ["bzImage", "build_kselftests"]
+depends_on = ["build"]
 resources = ["qemu_throttle"]
 requires_worktree = false
 error_exit_codes = [123]
@@ -70,12 +63,12 @@ if [[ ! -e "$rootfs/usr/bin" ]]; then
     exit 123
 fi
 
-kernel="$LIMMAT_ARTIFACTS_bzImage"/bzImage
+kernel="$LIMMAT_ARTIFACTS_build"/bzImage
 
 # Can't mount multiple directories using vng
 # https://github.com/arighi/virtme-ng/issues/237
 # Workaround by copying everything into a single directory
-cp -r "$LIMMAT_ARTIFACTS_build_kselftests" "$LIMMAT_ARTIFACTS/kselftest_install"
+cp -r "$LIMMAT_ARTIFACTS_build/kselftest_install" "$LIMMAT_ARTIFACTS"
 
 # Embed the runner script here so we get the benefit of local-ci's cache
 # invalidation logic
