@@ -178,6 +178,7 @@ ignore = [
     "COMMIT_LOG_LONG_LINE",   # Too noisy
     "MACRO_ARG_UNUSED",       # Bullshit
     "CONFIG_DESCRIPTION",     # Bullshit
+    "COMMIT_MESSAGE",         # yeah yeah yeah
 ]
 
 # Ignore more stuff on Google prodkernel trees.
