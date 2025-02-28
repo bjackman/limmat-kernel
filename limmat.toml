@@ -28,7 +28,7 @@ exec 2>&1
 
 # TODO: we can probably use a smaller config
 vng --kconfig
-scripts/config -e GUP_TEST
+scripts/config -e GUP_TEST -e USERFAULTFD
 CCACHE_SLOPPINESS=time_macros make -sj100 CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
 
 # We'd like to have the kselftest and kernel builds in separate jobs but it's
@@ -84,7 +84,7 @@ mkdir -p /mnt/kselftest_logs
 # Don't run userfaultfd because I see failures to do hugetlb 1G mmaps in uffd-mp-mremap, even if I
 # set --memory 64G. Seems like hugetlb_reserve_pages() is failing but I'm not sure why.
 cd /mnt/kselftest_install/mm
-for type in mmap gup_test compaction migration page_frag; do
+for type in mmap gup_test compaction migration page_frag userfaultfd; do
     ./run_vmtests.sh -t \\$type | tee /mnt/kselftest_logs/vmtests_\\$type.log || true
 done
 
