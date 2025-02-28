@@ -96,7 +96,7 @@ EOF
 chmod +x "$LIMMAT_ARTIFACTS/run.sh"
 
 unshare -r vng --verbose --user root --root "$(dirname $LIMMAT_CONFIG)/mkosi-rootfs/image"  \
-    --run "$kernel" --rwdir=/mnt="$LIMMAT_ARTIFACTS" -- "/mnt/run.sh"
+    --memory 4G --run "$kernel" --rwdir=/mnt="$LIMMAT_ARTIFACTS" -- "/mnt/run.sh"
 """
 
 [[tests]]
