@@ -34,7 +34,8 @@ CCACHE_SLOPPINESS=time_macros make -sj100 CC='ccache gcc' KBUILD_BUILD_TIMESTAMP
 # We'd like to have the kselftest and kernel builds in separate jobs but it's
 # annoying to build modules without a freshly compiled kernel tree.
 make -sj100 CC='ccache gcc' -C tools/testing/selftests \
-  TARGETS="mm" LDFLAGS=-static install INSTALL_PATH=$LIMMAT_ARTIFACTS/kselftest_install KDIR=$PWD
+  TARGETS="mm" FORCE_TARGETS=1 EXTRA_CFLAGS=-Werror LDFLAGS=-static \
+  install INSTALL_PATH=$LIMMAT_ARTIFACTS/kselftest_install KDIR=$PWD
 
 make kernelrelease > $LIMMAT_ARTIFACTS/kernelrelease.txt
 cp arch/x86/boot/bzImage $LIMMAT_ARTIFACTS
