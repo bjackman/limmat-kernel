@@ -180,6 +180,7 @@ ignore = [
     "CONFIG_DESCRIPTION",     # Bullshit
     "COMMIT_MESSAGE",         # yeah yeah yeah
     "LOGGING_CONTINUATION",   # yeah yeah yeah
+    "COMPLEX_MACRO",          # yeah yeah yeah
 ]
 
 # Ignore more stuff on Google prodkernel trees.
