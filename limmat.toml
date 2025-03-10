@@ -121,12 +121,14 @@ tools/testing/kunit/kunit.py run --kunitconfig ./mm/.kunitconfig \
 
 # Now run them with ASI. Here we're taking advantage of the leftover kunitconfig
 # from the previous step.
-scripts/config --file .kunit/.config -e MITIGATION_ADDRESS_SPACE_ISOLATION
-tools/testing/kunit/kunit.py run --kunitconfig ./mm/.kunitconfig \
-	--arch=x86_64 --kernel_args="movablecore=2G" \
-	--qemu_args="-m 4G" --kunitconfig mm/.kunitconfig
-# Check ASI was actually enabled
-grep -q MITIGATION_ADDRESS_SPACE_ISOLATION .kunit/.config
+if git grep -q MITIGATION_ADDRESS_SPACE_ISOLATION; then
+    scripts/config --file .kunit/.config -e MITIGATION_ADDRESS_SPACE_ISOLATION
+    tools/testing/kunit/kunit.py run --kunitconfig ./mm/.kunitconfig \
+        --arch=x86_64 --kernel_args="movablecore=2G" \
+        --qemu_args="-m 4G" --kunitconfig mm/.kunitconfig
+    # Check ASI was actually enabled
+    grep -q MITIGATION_ADDRESS_SPACE_ISOLATION .kunit/.config
+fi
 """
 
 [[tests]]
