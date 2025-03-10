@@ -117,21 +117,23 @@ kunit_run() {
 # kunit_run --kunitconfig ./security/landlock/.kunitconfig
 # kunit_run --kunitconfig ./fs/ext4/.kunitconfig
 
-# Run my mm KUnit tests
-# https://lore.kernel.org/linux-mm/20250224-page-alloc-kunit-v1-0-d337bb440889@google.com/
-kunit_run --kunitconfig ./mm/.kunitconfig \
-	--arch=x86_64 --kernel_args="movablecore=2G" \
-	--qemu_args="-m 4G" --kunitconfig mm/.kunitconfig
-
-# Now run them with ASI. Here we're taking advantage of the leftover kunitconfig
-# from the previous step.
-if git grep -q MITIGATION_ADDRESS_SPACE_ISOLATION; then
-    scripts/config --file .kunit/.config -e MITIGATION_ADDRESS_SPACE_ISOLATION
+if [ -e mm/.kunitconfig ]; then
+    # Run my mm KUnit tests
+    # https://lore.kernel.org/linux-mm/20250224-page-alloc-kunit-v1-0-d337bb440889@google.com/
     kunit_run --kunitconfig ./mm/.kunitconfig \
         --arch=x86_64 --kernel_args="movablecore=2G" \
         --qemu_args="-m 4G" --kunitconfig mm/.kunitconfig
-    # Check ASI was actually enabled
-    grep -q MITIGATION_ADDRESS_SPACE_ISOLATION .kunit/.config
+
+    # Now run them with ASI. Here we're taking advantage of the leftover kunitconfig
+    # from the previous step.
+    if git grep -q MITIGATION_ADDRESS_SPACE_ISOLATION; then
+        scripts/config --file .kunit/.config -e MITIGATION_ADDRESS_SPACE_ISOLATION
+        kunit_run --kunitconfig ./mm/.kunitconfig \
+            --arch=x86_64 --kernel_args="movablecore=2G" \
+            --qemu_args="-m 4G" --kunitconfig mm/.kunitconfig
+        # Check ASI was actually enabled
+        grep -q MITIGATION_ADDRESS_SPACE_ISOLATION .kunit/.config
+    fi
 fi
 """
 
