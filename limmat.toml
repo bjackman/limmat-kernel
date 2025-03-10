@@ -106,12 +106,27 @@ command = """
 set -eux
 exec 2>&1
 
-git clean -fdx -e .vscode >/dev/null # mrproper isn't always good enough
+# git clean -fdx -e .vscode >/dev/null # mrproper isn't always good enough
 
 # Random sample of tests
-tools/testing/kunit/kunit.py run --kunitconfig ./lib/kunit/.kunitconfig
-tools/testing/kunit/kunit.py run --kunitconfig ./security/landlock/.kunitconfig
-tools/testing/kunit/kunit.py run --kunitconfig ./fs/ext4/.kunitconfig
+# tools/testing/kunit/kunit.py run --kunitconfig ./lib/kunit/.kunitconfig
+# tools/testing/kunit/kunit.py run --kunitconfig ./security/landlock/.kunitconfig
+# tools/testing/kunit/kunit.py run --kunitconfig ./fs/ext4/.kunitconfig
+
+# Run my mm KUnit tests
+# https://lore.kernel.org/linux-mm/20250224-page-alloc-kunit-v1-0-d337bb440889@google.com/
+tools/testing/kunit/kunit.py run --kunitconfig ./mm/.kunitconfig \
+	--arch=x86_64 --kernel_args="movablecore=2G" \
+	--qemu_args="-m 4G" --kunitconfig mm/.kunitconfig
+
+# Now run them with ASI. Here we're taking advantage of the leftover kunitconfig
+# from the previous step.
+scripts/config --file .kunit/.config -e MITIGATION_ADDRESS_SPACE_ISOLATION
+tools/testing/kunit/kunit.py run --kunitconfig ./mm/.kunitconfig \
+	--arch=x86_64 --kernel_args="movablecore=2G" \
+	--qemu_args="-m 4G" --kunitconfig mm/.kunitconfig
+# Check ASI was actually enabled
+grep -q MITIGATION_ADDRESS_SPACE_ISOLATION .kunit/.config
 """
 
 [[tests]]
