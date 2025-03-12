@@ -29,6 +29,11 @@ exec 2>&1
 # TODO: we can probably use a smaller config
 vng --kconfig
 scripts/config -e GUP_TEST -e USERFAULTFD
+if git grep -q MITIGATION_ADDRESS_SPACE_ISOLATION; then
+    scripts/config -e MITIGATION_ADDRESS_SPACE_ISOLATION
+    make -j olddefconfig
+    grep -q MITIGATION_ADDRESS_SPACE_ISOLATION .config
+fi
 CCACHE_SLOPPINESS=time_macros make -sj100 CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
 
 # We'd like to have the kselftest and kernel builds in separate jobs but it's
