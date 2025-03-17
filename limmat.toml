@@ -181,6 +181,7 @@ ignore = [
     "COMMIT_MESSAGE",         # yeah yeah yeah
     "LOGGING_CONTINUATION",   # yeah yeah yeah
     "COMPLEX_MACRO",          # yeah yeah yeah
+    "LONG_LINE",              # yeah yeah yeah
 ]
 
 # Ignore more stuff on Google prodkernel trees.
