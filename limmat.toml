@@ -126,7 +126,7 @@ if [ -e mm/.kunitconfig ]; then
     # Run my mm KUnit tests
     # https://lore.kernel.org/linux-mm/20250224-page-alloc-kunit-v1-0-d337bb440889@google.com/
     kunit_run --kunitconfig ./mm/.kunitconfig \
-        --arch=x86_64 --kernel_args="movablecore=2G" \
+        --arch=x86_64 --kernel_args="movablecore=2G asi=on" \
         --qemu_args="-m 4G" --kunitconfig mm/.kunitconfig
 
     # Now run them with ASI. Here we're taking advantage of the leftover kunitconfig
