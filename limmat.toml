@@ -188,6 +188,7 @@ ignore = [
     "COMPLEX_MACRO",          # yeah yeah yeah
     "LONG_LINE",              # yeah yeah yeah
     "EXPORT_SYMBOL",          # noisy
+    "EMBEDDED_FUNCTION_NAME"  # noisy
 ]
 
 # Ignore more stuff on Google prodkernel trees.
