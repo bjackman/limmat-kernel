@@ -34,7 +34,7 @@ if git grep -q MITIGATION_ADDRESS_SPACE_ISOLATION; then
     make -j olddefconfig
     grep -q MITIGATION_ADDRESS_SPACE_ISOLATION .config
 fi
-CCACHE_SLOPPINESS=time_macros make -sj100 CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= 2>&1
+CCACHE_SLOPPINESS=time_macros make -sj100 CC='ccache gcc' KBUILD_BUILD_TIMESTAMP= all headers_install 2>&1
 
 # We'd like to have the kselftest and kernel builds in separate jobs but it's
 # annoying to build modules without a freshly compiled kernel tree.
