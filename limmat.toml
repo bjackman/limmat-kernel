@@ -115,7 +115,7 @@ exec 2>&1
 git clean -fdx -e .vscode >/dev/null # mrproper isn't always good enough
 
 kunit_run() {
-    tools/testing/kunit/kunit.py run --make_options "CC=ccache gcc" "$@"
+    tools/testing/kunit/kunit.py run "$@"
 }
 
 if [ -e mm/.kunitconfig ]; then
