@@ -118,11 +118,6 @@ kunit_run() {
     tools/testing/kunit/kunit.py run --make_options "CC=ccache gcc" "$@"
 }
 
-# # Random sample of tests (disabled, too slow)
-# kunit_run --kunitconfig ./lib/kunit/.kunitconfig
-# kunit_run --kunitconfig ./security/landlock/.kunitconfig
-# kunit_run --kunitconfig ./fs/ext4/.kunitconfig
-
 if [ -e mm/.kunitconfig ]; then
     # Run my mm KUnit tests
     # https://lore.kernel.org/linux-mm/20250224-page-alloc-kunit-v1-0-d337bb440889@google.com/
