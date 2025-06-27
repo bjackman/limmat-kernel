@@ -135,7 +135,7 @@ if [ -e mm/.kunitconfig ]; then
         # Check ASI was actually enabled
         grep -q MITIGATION_ADDRESS_SPACE_ISOLATION .kunit/.config
     fi
-elif git grep -q MITIGATION_ADDRESS_SPACE_ISOLATION; then
+elif git grep -q ASI_KUNIT_TESTS; then
     # In some branches I don't have a .kunitconfig. Those branches don't have
     # the silly complicated page_alloc kunit setup so we don't need the
     # movablecore dance.
