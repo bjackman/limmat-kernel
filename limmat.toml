@@ -140,7 +140,7 @@ elif git grep -q MITIGATION_ADDRESS_SPACE_ISOLATION; then
     # the silly complicated page_alloc kunit setup so we don't need the
     # movablecore dance.
     kunit_run --kconfig_add CONFIG_MITIGATION_ADDRESS_SPACE_ISOLATION=y \
-        --kernel_args asi=on "asi.*"
+        --kernel_args asi=on
     # Check ASI and its tests were actually enabled
     grep -q MITIGATION_ADDRESS_SPACE_ISOLATION .kunit/.config
     grep -q ASI_KUNIT_TESTS .kunit/.config
