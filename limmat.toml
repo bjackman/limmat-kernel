@@ -115,7 +115,7 @@ exec 2>&1
 git clean -fdx -e .vscode >/dev/null # mrproper isn't always good enough
 
 kunit_run() {
-    tools/testing/kunit/kunit.py run --arch=x86_64 "$@"
+    tools/testing/kunit/kunit.py run --arch=x86_64 --kernel_args panic_on_warn=1 "$@"
 }
 
 if [ -e mm/.kunitconfig ]; then
