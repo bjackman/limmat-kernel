@@ -100,7 +100,8 @@ EOF
 
 chmod +x "$LIMMAT_ARTIFACTS/run.sh"
 
-unshare -r vng --no-virtme-ng-init --verbose --user root --disable-microvm \
+unshare -r timeout --kill-after=10s 5m \
+    vng --no-virtme-ng-init --verbose --user root --disable-microvm \
     --root "$(dirname $LIMMAT_CONFIG)/mkosi-rootfs/image"  \
     --memory 4G --run "$kernel" --rwdir=/mnt="$LIMMAT_ARTIFACTS" --append "asi=on panic_on_warn=1" -- "/mnt/run.sh"
 """
