@@ -116,12 +116,19 @@ exec 2>&1
 git clean -fdx -e .vscode >/dev/null # mrproper isn't always good enough
 
 if git grep -q ASI_KUNIT_TESTS; then
+    # Run everything, with ASI on.
     tools/testing/kunit/kunit.py run --arch=x86_64 --raw_output=all \
         --kconfig_add CONFIG_MITIGATION_ADDRESS_SPACE_ISOLATION=y \
         --kernel_args asi=on
     # Check ASI and its tests were actually enabled
     grep -q MITIGATION_ADDRESS_SPACE_ISOLATION .kunit/.config
     grep -q ASI_KUNIT_TESTS .kunit/.config
+
+    # This time only run the ASI tests, so we can set panic_on_warn=1 (we can't
+    # set this for everything as some tests warn deliberately).
+    tools/testing/kunit/kunit.py run --arch=x86_64 --raw_output=all \
+        --kconfig_add CONFIG_MITIGATION_ADDRESS_SPACE_ISOLATION=y \
+        --kernel_args "asi=on panic_on_warn=1" "asi.*"
 fi
 """
 
