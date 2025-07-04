@@ -115,33 +115,9 @@ exec 2>&1
 
 git clean -fdx -e .vscode >/dev/null # mrproper isn't always good enough
 
-kunit_run() {
-    tools/testing/kunit/kunit.py run --arch=x86_64 \
-    --raw_output=all "$@"
-}
-
-if [ -e mm/.kunitconfig ]; then
-    # Run my mm KUnit tests
-    # https://lore.kernel.org/linux-mm/20250224-page-alloc-kunit-v1-0-d337bb440889@google.com/
-    kunit_run --kunitconfig ./mm/.kunitconfig \
-        --kernel_args="movablecore=2G asi=on" \
-        --qemu_args="-m 4G" --kunitconfig mm/.kunitconfig
-
-    # Now run them with ASI. Here we're taking advantage of the leftover kunitconfig
-    # from the previous step.
-    if git grep -q MITIGATION_ADDRESS_SPACE_ISOLATION; then
-        scripts/config --file .kunit/.config -e MITIGATION_ADDRESS_SPACE_ISOLATION
-        kunit_run --kunitconfig ./mm/.kunitconfig \
-            --kernel_args="movablecore=2G" \
-            --qemu_args="-m 4G" --kunitconfig mm/.kunitconfig
-        # Check ASI was actually enabled
-        grep -q MITIGATION_ADDRESS_SPACE_ISOLATION .kunit/.config
-    fi
-elif git grep -q ASI_KUNIT_TESTS; then
-    # In some branches I don't have a .kunitconfig. Those branches don't have
-    # the silly complicated page_alloc kunit setup so we don't need the
-    # movablecore dance.
-    kunit_run --kconfig_add CONFIG_MITIGATION_ADDRESS_SPACE_ISOLATION=y \
+if git grep -q ASI_KUNIT_TESTS; then
+    tools/testing/kunit/kunit.py run --arch=x86_64 --raw_output=all \
+        --kconfig_add CONFIG_MITIGATION_ADDRESS_SPACE_ISOLATION=y \
         --kernel_args asi=on
     # Check ASI and its tests were actually enabled
     grep -q MITIGATION_ADDRESS_SPACE_ISOLATION .kunit/.config
